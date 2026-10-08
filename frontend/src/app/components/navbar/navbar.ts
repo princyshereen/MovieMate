@@ -17,6 +17,7 @@ import { AuthService } from '../../services/auth.service';
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
           <a routerLink="/movies" routerLinkActive="active">Movies</a>
           @if (auth.isLoggedIn()) {
+            <a routerLink="/recommendations" routerLinkActive="active">Recommendations</a>
             <a routerLink="/watchlist" routerLinkActive="active">Watchlist</a>
             <button class="nav-action" type="button" (click)="logout()">Logout</button>
           } @else {

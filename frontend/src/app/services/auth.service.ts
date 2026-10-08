@@ -11,7 +11,7 @@ export interface AuthenticatedUser {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly usersUrl = 'http://localhost:3000/api/users';
+  private readonly usersUrl = 'http://localhost:3001/api/users';
   private readonly storageKey = 'movieExplorerUser';
   private readonly userState = signal<AuthenticatedUser | null>(this.readStoredUser());
 

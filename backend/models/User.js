@@ -35,6 +35,33 @@ const userSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  preferredLanguages: {
+    type: [String],
+    default: [],
+  },
+  preferredGenres: {
+    type: [String],
+    default: [],
+  },
+  favoriteMovieTitles: {
+    type: [String],
+    default: [],
+  },
+  recommendationControls: {
+    type: {
+      focus: { type: String, default: 'balanced' },
+      languageBoost: { type: String, default: 'all' },
+      genreBoost: { type: String, default: '' },
+      diversityBias: { type: Number, default: 0.5 },
+      noveltyBias: { type: Number, default: 0.5 },
+      popularityBias: { type: Number, default: 0.5 },
+    },
+    default: {},
+  },
+  onboardingCompleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);

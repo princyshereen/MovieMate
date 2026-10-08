@@ -7,7 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 app.disable('x-powered-by');
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const allowedOrigins = new Set(['http://localhost:4200', 'http://localhost:4201']);
 
 app.use((req, res, next) => {

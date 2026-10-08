@@ -150,6 +150,43 @@ router.get('/tamil', async (req, res) => {
   }
 });
 
+router.get('/regional', async (req, res) => {
+  const languageLookup = {
+    Tamil: ['96', 'Vikram', 'Kaithi', 'Asuran', 'Doctor', 'Raja Rani'],
+    English: ['Arrival', 'The Social Network', 'Dune', 'The Matrix', 'Inception'],
+    Hindi: ['3 Idiots', 'Lagaan', 'Gully Boy', 'The Lunchbox', 'Padmaavat'],
+    Telugu: ['RRR', 'Baahubali', 'Karthikeya', 'Arjun Reddy', 'Sye Raa Narasimha Reddy'],
+    Malayalam: ['Premam', 'Minnal Murali', 'The Great Indian Kitchen', 'Bangalore Days'],
+    Kannada: ['Kantara', 'KGF', 'Lucia', 'U-Turn'],
+  };
+
+  const requestedLanguage = (req.query.language || 'Tamil').toString();
+  const selectedLanguages = languageLookup[requestedLanguage]
+    ? [requestedLanguage]
+    : Object.keys(languageLookup);
+
+  try {
+    const results = await Promise.all(selectedLanguages.flatMap((language) => (
+      languageLookup[language].map(async (title) => {
+        try {
+          const movie = await fetchFromOMDb({ t: title, type: 'movie', plot: 'full' });
+          const mappedMovie = mapMovieDetails(movie);
+          return { ...mappedMovie, language: language };
+        } catch (error) {
+          if (error.status === 404) {
+            return null;
+          }
+          throw error;
+        }
+      })
+    )));
+
+    return res.json(results.filter(Boolean).slice(0, 12));
+  } catch (error) {
+    return handleOMDbError(res, error);
+  }
+});
+
 router.get('/:imdbId', async (req, res) => {
   if (!/^tt\d+$/.test(req.params.imdbId)) {
     return res.status(400).json({ message: 'Movie ID must be a valid IMDb ID, such as tt0133093.' });

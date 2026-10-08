@@ -35,6 +35,11 @@ export interface UserAccount {
   id: string;
   name: string;
   email: string;
+  preferredLanguages?: string[];
+  preferredGenres?: string[];
+  favoriteMovieTitles?: string[];
+  recommendationControls?: Record<string, string | number>;
+  onboardingCompleted?: boolean;
 }
 
 export interface UserResponse {
@@ -43,11 +48,23 @@ export interface UserResponse {
   token?: string;
 }
 
+export interface RecommendationProfile {
+  preferredLanguages: string[];
+  preferredGenres: string[];
+  favoriteMovieTitles: string[];
+  recommendationControls: Record<string, string | number>;
+}
+
+export interface Recommendation extends Movie {
+  score?: number;
+  explanation?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MovieService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/movies';
-  private readonly usersUrl = 'http://localhost:3000/api/users';
+  private readonly apiUrl = 'http://localhost:3001/api/movies';
+  private readonly usersUrl = 'http://localhost:3001/api/users';
 
   getMovies(): Observable<Movie[]> {
     return this.http.get<OMDbMovie[]>(this.apiUrl).pipe(
@@ -65,6 +82,30 @@ export class MovieService {
     return this.http.get<OMDbMovie>(`${this.apiUrl}/${id}`).pipe(
       map((movie) => this.mapMovie(movie)),
     );
+  }
+
+  getRegionalCinema(language = 'Tamil'): Observable<Movie[]> {
+    return this.http.get<OMDbMovie[]>(`${this.apiUrl}/regional?language=${encodeURIComponent(language)}`).pipe(
+      map((movies) => movies.map((movie) => this.mapMovie(movie))),
+    );
+  }
+
+  savePreferences(userId: string, token: string, payload: Record<string, unknown>): Observable<{ message: string; user: UserAccount }> {
+    return this.http.post<{ message: string; user: UserAccount }>(`${this.usersUrl}/preferences/${userId}`, payload, {
+      headers: this.authHeaders(token),
+    });
+  }
+
+  getProfile(userId: string, token: string): Observable<{ user: UserAccount; profile: RecommendationProfile }> {
+    return this.http.get<{ user: UserAccount; profile: RecommendationProfile }>(`${this.usersUrl}/profile/${userId}`, {
+      headers: this.authHeaders(token),
+    });
+  }
+
+  getRecommendations(userId: string, token: string, focus = 'balanced'): Observable<{ recommendations: Recommendation[]; profile: RecommendationProfile }> {
+    return this.http.get<{ recommendations: Recommendation[]; profile: RecommendationProfile }>(`${this.usersUrl}/recommendations/${userId}?focus=${encodeURIComponent(focus)}`, {
+      headers: this.authHeaders(token),
+    });
   }
 
   register(name: string, email: string, password: string): Observable<UserResponse> {
